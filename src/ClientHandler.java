@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -29,7 +26,53 @@ public class ClientHandler implements Runnable{
 
     @Override
     public void run() {
-        
+        String messaString;
+
+        while(socket.isConnected()) {
+            try {
+                messaString = bufferedReader.readLine(); // Read the message from the client
+                broadcastMessage(messaString); // Broadcast the message to all clients
+            } catch (IOException e) {
+                closeEverything(socket, bufferedWriter, bufferedReader); // Close the socket and the streams
+                break;
+            }
+        }
+    }
+
+    public void broadcastMessage(String messageToSend) {
+        for (ClientHandler clientHandler : clientList) { // Loop through all clients
+            try {
+                if (!clientHandler.clientName.equals(clientName)) { // If the client is not the sender
+                    clientHandler.bufferedWriter.write(messageToSend); // Write the message to the client
+                    clientHandler.bufferedWriter.newLine(); // Add a new line
+                    clientHandler.bufferedWriter.flush(); // Flush the stream
+                }
+            } catch (IOException e) {
+                closeEverything(socket, bufferedWriter, bufferedReader); // Close the socket and the streams
+            }
+        }
+    }
+
+    public void removeClientHandler() {
+        clientList.remove(this); // Remove the client from the list
+        broadcastMessage("SERVER: " + clientName + " has left the chat!"); // Broadcast the message to all clients
+    }
+
+    public void closeEverything(Socket socket, BufferedWriter bufferedWriter, BufferedReader bufferedReader) {
+        removeClientHandler(); // Remove the client from the list
+        try {
+            if (bufferedWriter != null) {
+                bufferedWriter.close(); // Close the BufferedWriter
+            }
+            if (bufferedReader != null) {
+                bufferedReader.close(); // Close the BufferedReader
+            }
+            if (socket != null) {
+                socket.close(); // Close the socket
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
