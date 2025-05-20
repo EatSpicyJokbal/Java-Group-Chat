@@ -36,7 +36,7 @@ public class Server {
         }
     }
 
-    public void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
 
         ServerSocket serverSocket = new ServerSocket(1234);            // Create a server socket on port 1234
         System.out.println("Server started on port 1234");
