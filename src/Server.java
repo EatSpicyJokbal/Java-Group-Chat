@@ -16,7 +16,7 @@ public class Server {
             while(!serverSocket.isClosed()) {                                   // Run the server indefinitely
                 Socket socket = serverSocket.accept();                          // The program will wait here until a client connects
                 System.out.println("A new client has connected");
-                ClientHandler clientHandler = new ClientHandler(socket);        // Create a new thread for the client
+                ClientHandler clientHandler = new ClientHandler(socket);
                 Thread thread = new Thread(clientHandler);                      // Create a new thread for the client
                 thread.start();                                                 // Start the thread
             }
