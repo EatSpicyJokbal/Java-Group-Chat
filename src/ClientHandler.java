@@ -88,13 +88,9 @@ public class ClientHandler implements Runnable{
     }
 
     private String getActiveUsersList() {
-        StringBuilder userList = new StringBuilder("Active users: ");
+        StringBuilder userList = new StringBuilder("Active users:\n");
         for (ClientHandler client : clientList) {
-            userList.append(client.clientName).append(", ");
-        }
-        // Remove the last comma and space if there are users
-        if (userList.length() > 14) {
-            userList.setLength(userList.length() - 2);
+            userList.append("- |  ").append(client.clientName).append("\n");
         }
         return userList.toString();
     }
