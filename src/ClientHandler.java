@@ -9,7 +9,6 @@ public class ClientHandler implements Runnable{
     private BufferedReader bufferedReader; // BufferedReader to read the messages from the client
     private BufferedWriter bufferedWriter; // BufferedWriter to write the messages to the client
     private String clientName; // Name of the client
-    private String clientID; // ID of the client
 
     public ClientHandler(Socket socket) {
         try {
@@ -17,6 +16,7 @@ public class ClientHandler implements Runnable{
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())); // Create a new BufferedWriter to write the messages to the client
             this.bufferedReader = new BufferedReader(new java.io.InputStreamReader(socket.getInputStream())); // Create a new BufferedReader to read the messages from the client
             this.clientName = bufferedReader.readLine(); // Read the username of the client
+            SqlManager.sqlUsers(clientName); // Add the username to the database
             clientList.add(this);
             broadcastMessage("SERVER: " + clientName + " has entered the chat!"); // Broadcast the message to all clients
         } catch (IOException e) {
@@ -31,7 +31,19 @@ public class ClientHandler implements Runnable{
         while(socket.isConnected()) {
             try {
                 messaString = bufferedReader.readLine(); // Read the message from the client
-                broadcastMessage(messaString); // Broadcast the message to all clients
+                // Check if the client is requesting the list of active users
+                if(messaString != null && messaString.equalsIgnoreCase("list_users")) {
+                    bufferedWriter.write(getActiveUsersList()); // Send the list of active users to the client
+                    bufferedWriter.newLine(); // Add a new line
+                    bufferedWriter.flush(); // Flush the stream
+                } else if (messaString.toLowerCase().contains("list")) {
+                    bufferedWriter.write("ERROR: Unknown command. Did you mean 'list_users'?"); // Send an error message to the client
+                    bufferedWriter.newLine();
+                    bufferedWriter.flush();
+                }
+                else {
+                    broadcastMessage(messaString); // Broadcast the message to all clients
+                }
             } catch (IOException e) {
                 closeEverything(socket, bufferedWriter, bufferedReader); // Close the socket and the streams
                 break;
@@ -73,6 +85,18 @@ public class ClientHandler implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String getActiveUsersList() {
+        StringBuilder userList = new StringBuilder("Active users: ");
+        for (ClientHandler client : clientList) {
+            userList.append(client.clientName).append(", ");
+        }
+        // Remove the last comma and space if there are users
+        if (userList.length() > 14) {
+            userList.setLength(userList.length() - 2);
+        }
+        return userList.toString();
     }
 
 }

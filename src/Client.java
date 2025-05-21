@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Scanner;
 
 public class Client {
@@ -32,7 +31,11 @@ public class Client {
             Scanner scanner = new Scanner(System.in);
             while (socket.isConnected()) {
                 String messageToSend = scanner.nextLine();
-                bufferedWriter.write(clientName + ": " + messageToSend);
+                if(messageToSend.equalsIgnoreCase("list_users")) {
+                    bufferedWriter.write("list_users");
+                } else {
+                    bufferedWriter.write(clientName + ": " + messageToSend);
+                }
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
             }
